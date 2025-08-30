@@ -26,13 +26,15 @@ export default function VisualizerContent() {
   useEffect(() => {
     if (!session?.accessToken) return;
 
-    const fetchCurrentTrack = async () => {
+    const fetchCurrentTrack = async (isInitialFetch = false) => {
       try {
-        setLoading(true);
+        if (isInitialFetch) {
+          setLoading(true);
+        }
         setError(null);
-        
+
         const response = await getCurrentTrack(session.accessToken!);
-        
+
         if (response) {
           setCurrentTrack(response.item);
           setIsPlaying(response.is_playing);
@@ -44,14 +46,17 @@ export default function VisualizerContent() {
         setError("Failed to fetch current track");
         console.error("Error fetching track:", err);
       } finally {
-        setLoading(false);
+        if (isInitialFetch) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchCurrentTrack();
+    // Initial fetch with loading
+    fetchCurrentTrack(true);
 
-    // Poll for updates every 5 seconds
-    const interval = setInterval(fetchCurrentTrack, 5000);
+    // Poll for updates every 5 seconds without loading
+    const interval = setInterval(() => fetchCurrentTrack(false), 5000);
 
     return () => clearInterval(interval);
   }, [session?.accessToken]);

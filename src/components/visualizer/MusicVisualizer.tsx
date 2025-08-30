@@ -12,12 +12,28 @@ interface MusicVisualizerProps {
 export default function MusicVisualizer({ track, isPlaying }: MusicVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
+  const albumArtImage = useRef<HTMLImageElement | null>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Load album art when track changes
+  useEffect(() => {
+    if (track?.album.images[0]?.url && isClient) {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        albumArtImage.current = img;
+      };
+      img.onerror = () => {
+        console.error("Failed to load album art:", track.album.images[0].url);
+      };
+      img.src = track.album.images[0].url;
+    }
+  }, [track?.album.images[0]?.url, isClient]);
 
   // Handle window resize
   useEffect(() => {
@@ -105,20 +121,45 @@ export default function MusicVisualizer({ track, isPlaying }: MusicVisualizerPro
       if (track?.album.images[0]?.url) {
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
+        const cornerRadius = 20;
 
-        // Draw pulsing circle behind album art
+        // Draw album art image with rounded corners and drop shadow first
+        if (albumArtImage.current) {
+          const size = 200;
+          const imageX = centerX - size / 2;
+          const imageY = centerY - size / 2;
+
+          ctx.save();
+
+          // Create drop shadow
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+          ctx.shadowBlur = 20;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 10;
+
+          // Create rounded rectangle path for clipping
+          ctx.beginPath();
+          ctx.roundRect(imageX, imageY, size, size, cornerRadius);
+          ctx.clip();
+
+          // Draw the image
+          ctx.drawImage(albumArtImage.current, imageX, imageY, size, size);
+
+          ctx.restore();
+        }
+
+        // Draw pulsing rounded square background after the image
         const pulseSize = isPlaying ? 120 + Math.sin(time * 2) * 20 : 120;
+
+        ctx.save();
         ctx.strokeStyle = `rgba(255, 255, 255, ${isPlaying ? 0.3 : 0.1})`;
         ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, pulseSize, 0, Math.PI * 2);
-        ctx.stroke();
 
-        // Draw album art placeholder (circle for now)
-        ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+        // Draw rounded square
         ctx.beginPath();
-        ctx.arc(centerX, centerY, 100, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.roundRect(centerX - pulseSize / 2, centerY - pulseSize / 2, pulseSize, pulseSize, cornerRadius);
+        ctx.stroke();
+        ctx.restore();
       }
 
       animationRef.current = requestAnimationFrame(animate);
