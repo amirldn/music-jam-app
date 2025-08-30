@@ -1,5 +1,6 @@
 import Image from "next/image";
 import SignIn from "../../components/sign-in";
+import UserAvatar from "../../components/user_avatar";
 
 export default function Home() {
   return (
@@ -99,6 +100,7 @@ export default function Home() {
           />
           Go to nextjs.org →
         </a>
+        <UserAvatar />
       </footer>
     </div>
   );
