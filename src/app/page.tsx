@@ -1,6 +1,7 @@
 import Image from "next/image";
 import SignIn from "../../components/sign-in";
 import UserAvatar from "../../components/user_avatar";
+import NowPlaying from "../../components/now_playing";
 
 export default function Home() {
   return (
@@ -53,6 +54,8 @@ export default function Home() {
           </a>
           <SignIn />
         </div>
+        <UserAvatar />
+        <NowPlaying />
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <a
@@ -100,7 +103,6 @@ export default function Home() {
           />
           Go to nextjs.org →
         </a>
-        <UserAvatar />
       </footer>
     </div>
   );
