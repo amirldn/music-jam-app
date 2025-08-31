@@ -1,4 +1,4 @@
-import { auth } from "../auth";
+import { auth } from "@/app/auth";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 
 export default async function NowPlaying() {
@@ -14,7 +14,6 @@ export default async function NowPlaying() {
     if (!session.user.accessToken) {
         return <div>No access token available - something went really wrong</div>;
     }
-    console.log("env")
 
     const sdk = SpotifyApi.withAccessToken(
         process.env.AUTH_SPOTIFY_ID as string,
