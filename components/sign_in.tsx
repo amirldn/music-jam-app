@@ -15,13 +15,8 @@ export default function SignIn() {
 			>
 				<div className="flex gap-2 items-center">
 					<FaSpotify />
-					<span className="text-nowrap font-mono">
-						Sign in with Spotify
-					</span>
+					<span className="text-nowrap font-mono">Sign in with Spotify</span>
 				</div>
-
-
-
 			</button>
 		</form>
 	);
