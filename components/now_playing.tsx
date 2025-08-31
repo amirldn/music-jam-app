@@ -1,56 +1,39 @@
-
-import { auth } from "../auth"
+import { auth } from "../auth";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 
-
-
 export default async function NowPlaying() {
-    const session = await auth()
-    if (!session) {
-        return <div>No active session - please sign in to see your now playing.</div>
+    if (!process.env.AUTH_SPOTIFY_ID) {
+        console.log("No Spotify client ID configured");
     }
-    if (!session.user) { return <div>Unable to fetch user profile - something went really wrong.</div>; }
-    console.log("User:", session.user);
+    const session = await auth();
+    if (!session) {
+        return (
+            <div>No active session - please sign in to see your now playing.</div>
+        );
+    }
+    if (!session.user.accessToken) {
+        return <div>No access token available - something went really wrong</div>;
+    }
+    console.log("env")
 
-    if (!session.user.accessToken) { return <div>No access token available - something went really wrong</div>; }
-    console.log("Access Token:", session.user.accessToken);
-
-    const sdk = SpotifyApi.withAccessToken("3e2088ff545f49d38963e602db5d68bb", session.user.accessToken);
-
-    console.log("Session:", session);
-    console.log('sdk:', sdk);
-
-    const user = await sdk.currentUser.profile()
-    if (!user) { return <div>Unable to fetch user profile - something went really wrong.</div>; }
-    console.log("User profile:", user);
-
+    const sdk = SpotifyApi.withAccessToken(
+        process.env.AUTH_SPOTIFY_ID as string,
+        session.user.accessToken
+    );
 
     if (!session?.user) {
-        return <div>Please sign in to see your now playing.</div>
-    }
-
-    if (!session.user.accessToken) {
-        return <div>No access token available. Please sign in again.</div>
+        return <div>Please sign in to see your now playing.</div>;
     }
 
     const nowPlaying = await sdk.player.getCurrentlyPlayingTrack();
 
-
-    try {
-
-        // Get the currently playing track
-
-        return (
-            <div>
-                {
-                    nowPlaying?.item
-                        ? <div>Now playing: {nowPlaying.item.name}</div>
-                        : <div>Nothing is playing right now.</div>
-                }
-            </div>
-        );
-    } catch (error) {
-        console.error('Error fetching currently playing track:', error);
-        return <div>Error fetching currently playing track. Please try again.</div>
-    }
+    return (
+        <div>
+            {nowPlaying?.item ? (
+                <div>Now playing: {nowPlaying.item.name}</div>
+            ) : (
+                <div>Nothing is playing right now.</div>
+            )}
+        </div>
+    );
 }
