@@ -1,6 +1,7 @@
 import NextAuth, { type DefaultSession } from "next-auth"
 import Spotify from "next-auth/providers/spotify"
 import { AccessToken } from "@spotify/web-api-ts-sdk";
+import { type DefaultJWT } from "next-auth/jwt"
 
 declare module "next-auth" {
   interface Session {
@@ -10,20 +11,20 @@ declare module "next-auth" {
     } & DefaultSession["user"]
   }
   
-  interface JWT {
-    /** The user's Spotify access token string */
-    accessToken?: string
-  }
-  // TODO: add the default JWT interface back
+
 }
 
-  const scope = new URLSearchParams();
-  scope.append("scope", "user-read-email user-read-currently-playing");
+declare module "next-auth/jwt" {
+    interface JWT {
+    /** The user's Spotify OAuth access token string */
+    accessToken?: string & DefaultJWT["accessToken"]
+  } 
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
 
   providers: [
-    // https://github.com/nextauthjs/next-auth/issues/11698 - improve this at some point
+    // https://github.com/nextauthjs/next-auth/issues/11698 - improve this scope
     Spotify({
       authorization: `https://accounts.spotify.com/authorize?scope=${encodeURIComponent('user-read-email user-read-currently-playing')}`,
     })
@@ -33,7 +34,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, account }) {
       // Persist the OAuth access token to the token right after signin
       if (account) {
-        console.log ("Account:", account);
         token.accessToken = account.access_token;
       }
       return token;
@@ -42,7 +42,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // Create the AccessToken object and add it to the session
       if (token.accessToken) {
         const accessToken: AccessToken = {
-          access_token: token.accessToken as string,
+          access_token: token.accessToken,
           // TODO: get rid of this string
           token_type: "Bearer",
           expires_in: 3600, // This will be updated when we implement refresh logic
