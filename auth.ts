@@ -18,17 +18,16 @@ declare module "next-auth" {
 }
 
   const scope = new URLSearchParams();
-  const scopes = [
-    "user-read-private",
-    "user-read-email",
-    "user-read-playback-state",
-    "user-read-currently-playing","user-top-read"]
-  scope.append("scope", scopes.join(" "));
+  scope.append("scope", "user-read-email user-read-currently-playing");
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
 
-  providers: [Spotify({authorization: {params: {scope: `https://accounts.spotify.com/authorize?${scope.toString()}`}}})]
-,
+  providers: [
+    // https://github.com/nextauthjs/next-auth/issues/11698 - improve this at some point
+    Spotify({
+      authorization: `https://accounts.spotify.com/authorize?scope=${encodeURIComponent('user-read-email user-read-currently-playing')}`,
+    })
+  ],
 
   callbacks: {
     async jwt({ token, account }) {
