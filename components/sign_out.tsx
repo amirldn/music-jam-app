@@ -1,6 +1,16 @@
+"use client";
+
 import { signOut } from "@/app/auth";
+import { useSession } from "next-auth/react";
 
 export default function SignOut() {
+	const { data: session, status } = useSession();
+
+	// Don't show sign-out button if user is not authenticated
+	if (status === "loading" || !session) {
+		return null;
+	}
+
 	return (
 		<form
 			action={async () => {
