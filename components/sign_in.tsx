@@ -1,17 +1,7 @@
-"use client";
-
 import { signIn } from "@/app/auth";
-import { useSession } from "next-auth/react";
 import { FaSpotify } from "react-icons/fa";
 
 export default function SignIn() {
-	const { data: session, status } = useSession();
-
-	// Don't show sign-in button if user is already authenticated
-	if (status === "loading" || session) {
-		return null;
-	}
-
 	return (
 		<form
 			action={async () => {
