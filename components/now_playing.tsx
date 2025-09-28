@@ -2,11 +2,71 @@
 
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
-import { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import { SpotifyApi, PlaybackState } from "@spotify/web-api-ts-sdk";
+
+interface NowPlayingViewProps {
+	track?: {
+		name: string;
+		artists?: Array<{ name: string }>;
+		album?: {
+			name: string;
+			images: Array<{ url: string; height: number; width: number }>;
+		};
+		images?: Array<{ url: string; height: number; width: number }>;
+	};
+	isPlaying?: boolean;
+}
+
+function NowPlayingView({ track, isPlaying = false }: NowPlayingViewProps) {
+	const albumCover = track?.album?.images?.[0]?.url || track?.images?.[0]?.url;
+	const artistNames = track?.artists?.map(artist => artist.name).join(", ");
+
+	return (
+		<div className="fixed top-1/2 left-1/2 transform p-6 bg-zinc-900/60 backdrop-blur-md rounded-xl shadow-[0_0_30px_rgba(22,163,74,0.3)] animate-float">
+			<div className="max-w-screen-lg mx-auto grid grid-cols-12 gap-6">
+				<div className="col-span-4 flex items-center justify-center">
+					<div className="w-48 h-48 bg-zinc-800 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
+						{albumCover ? (
+							<img
+								src={albumCover}
+								alt={`${track?.album?.name} album cover`}
+								className="w-full h-full object-cover"
+							/>
+						) : (
+							<span className="text-zinc-500 text-lg">No track</span>
+						)}
+					</div>
+				</div>
+				<div className="col-span-8 flex flex-col justify-center">
+					<h2 className="text-white text-3xl font-bold mb-2">
+						{track?.name || "Not Playing"}
+					</h2>
+					<p className="text-zinc-400 text-xl">
+						{artistNames || "Connect Spotify to see what's playing"}
+					</p>
+					{track?.album?.name && (
+						<p className="text-zinc-500 text-lg mt-1">
+							{track.album.name}
+						</p>
+					)}
+					{track && (
+						<div className="mt-2">
+							<span className={`inline-flex items-center px-2 py-1 rounded-full text-xs text-white ${
+								isPlaying ? 'bg-green-600' : 'bg-gray-600'
+							}`}>
+								{isPlaying ? '● Playing' : '⏸ Paused'}
+							</span>
+						</div>
+					)}
+				</div>
+			</div>
+		</div>
+	);
+}
 
 export default function NowPlaying() {
 	const { data: session, status } = useSession();
-	const [nowPlaying, setNowPlaying] = useState<any>(null);
+	const [nowPlaying, setNowPlaying] = useState<PlaybackState | null>(null);
 	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
@@ -42,31 +102,14 @@ export default function NowPlaying() {
 		}
 	}, [status, session?.user?.accessToken]);
 
-	if (status === "loading") {
-		return <div>Loading session...</div>;
-	}
-
-	if (!session) {
-		return (
-			<div>No active session - please sign in to see your now playing.</div>
-		);
-	}
-
-	if (!session.user.accessToken) {
-		return <div>No access token available - something went really wrong</div>;
-	}
-
-	if (loading) {
-		return <div>Loading now playing...</div>;
+	if (status === "loading" || loading) {
+		return <div>Loading...</div>;
 	}
 
 	return (
-		<div>
-			{nowPlaying?.item ? (
-				<div>Now playing: {nowPlaying.item.name}</div>
-			) : (
-				<div>Nothing is playing right now.</div>
-			)}
-		</div>
+		<NowPlayingView
+			track={nowPlaying?.item}
+			isPlaying={nowPlaying?.is_playing}
+		/>
 	);
 }
