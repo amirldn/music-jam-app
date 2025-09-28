@@ -24,7 +24,7 @@ function NowPlayingView({ track, isPlaying = false, isTransitioning = false }: N
 	const artistNames = track?.artists?.map(artist => artist.name).join(", ");
 
 	return (
-		<div className="fixed top-1/2 left-1/2 transform p-6 bg-zinc-900/60 backdrop-blur-md rounded-xl shadow-[0_0_30px_rgba(22,163,74,0.3)] animate-float">
+		<div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-6 bg-zinc-900/60 backdrop-blur-md rounded-xl shadow-[0_0_30px_rgba(22,163,74,0.3)] animate-float">
 			<div className="max-w-screen-lg mx-auto grid grid-cols-12 gap-6">
 				<div className="col-span-4 flex items-center justify-center">
 					<div className="w-48 h-48 bg-zinc-800 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
@@ -175,7 +175,7 @@ export default function NowPlaying() {
 
 	if (initialLoading) {
 		return (
-			<div className="fixed top-1/2 left-1/2 transform p-6 bg-zinc-900/60 backdrop-blur-md rounded-xl shadow-[0_0_30px_rgba(22,163,74,0.3)] animate-float">
+			<div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-6 bg-zinc-900/60 backdrop-blur-md rounded-xl shadow-[0_0_30px_rgba(22,163,74,0.3)] animate-float">
 				<div className="max-w-screen-lg mx-auto grid grid-cols-12 gap-6">
 					<div className="col-span-4 flex items-center justify-center">
 						<div className="w-48 h-48 bg-zinc-800 rounded-lg animate-pulse"></div>
