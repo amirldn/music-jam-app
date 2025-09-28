@@ -118,8 +118,20 @@ export default function NowPlaying() {
 
 	if (loading) {
 		return (
-			<div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-6 bg-zinc-900/60 backdrop-blur-md rounded-xl">
-				<div className="text-white text-xl">Fetching track info...</div>
+			<div className="fixed top-1/2 left-1/2 transform p-6 bg-zinc-900/60 backdrop-blur-md rounded-xl shadow-[0_0_30px_rgba(22,163,74,0.3)] animate-float">
+				<div className="max-w-screen-lg mx-auto grid grid-cols-12 gap-6">
+					<div className="col-span-4 flex items-center justify-center">
+						<div className="w-48 h-48 bg-zinc-800 rounded-lg animate-pulse"></div>
+					</div>
+					<div className="col-span-8 flex flex-col justify-center">
+						<div className="h-9 bg-zinc-700 rounded animate-pulse mb-2"></div>
+						<div className="h-6 bg-zinc-700 rounded animate-pulse w-3/4 mb-1"></div>
+						<div className="h-5 bg-zinc-700 rounded animate-pulse w-1/2 mt-1"></div>
+						<div className="mt-2">
+							<div className="h-6 bg-zinc-700 rounded-full animate-pulse w-20"></div>
+						</div>
+					</div>
+				</div>
 			</div>
 		);
 	}
