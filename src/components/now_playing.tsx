@@ -70,14 +70,17 @@ function NowPlayingView({ track, isPlaying = false }: NowPlayingViewProps) {
 export default function NowPlaying() {
 	const { data: session, status } = useSession();
 	const [nowPlaying, setNowPlaying] = useState<PlaybackState | null>(null);
-	const [loading, setLoading] = useState(false);
+	const [initialLoading, setInitialLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (status === "authenticated" && session?.user?.accessToken) {
 			const fetchNowPlaying = async () => {
 				try {
-					setLoading(true);
+					// Only show loading state if this is the first fetch
+					if (!nowPlaying) {
+						setInitialLoading(true);
+					}
 					setError(null);
 					const accessToken = session.user.accessToken;
 					if (!accessToken) return;
@@ -91,9 +94,12 @@ export default function NowPlaying() {
 					setNowPlaying(result);
 				} catch (error) {
 					console.error("Error fetching now playing:", error);
-					setError("Failed to fetch current track. Please try again.");
+					// Only show error if we don't have existing data
+					if (!nowPlaying) {
+						setError("Failed to fetch current track. Please try again.");
+					}
 				} finally {
-					setLoading(false);
+					setInitialLoading(false);
 				}
 			};
 
@@ -116,7 +122,7 @@ export default function NowPlaying() {
 		);
 	}
 
-	if (loading) {
+	if (initialLoading) {
 		return (
 			<div className="fixed top-1/2 left-1/2 transform p-6 bg-zinc-900/60 backdrop-blur-md rounded-xl shadow-[0_0_30px_rgba(22,163,74,0.3)] animate-float">
 				<div className="max-w-screen-lg mx-auto grid grid-cols-12 gap-6">
