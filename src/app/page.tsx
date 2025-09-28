@@ -1,6 +1,6 @@
 import Image from "next/image";
-import SignIn from "../../components/sign_in";
-import SignOut from "../../components/sign_out";
+import SignIn from "@/components/sign_in";
+import SignOut from "@/components/sign_out";
 
 export default function Home() {
 	return (
