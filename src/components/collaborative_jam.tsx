@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { supabase, type Database } from "@/lib/supabase";
@@ -23,50 +23,52 @@ export default function CollaborativeJam({ jamCode }: CollaborativeJamProps) {
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 
+	// Join jam function that can be called from multiple places
+	const joinJam = useCallback(async () => {
+		try {
+			setError(null);
+			setIsLoading(true);
+			const response = await fetch(`/api/jams/${jamCode}/join`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+			});
+
+			const data = await response.json();
+
+			if (!response.ok) {
+				throw new Error(data.error || "Failed to join jam");
+			}
+
+			setJam(data.jam);
+			setIsJoined(true);
+			// Fetch participants after joining
+			try {
+				const { data: participantsData, error } = await supabase
+					.from("jam_participants")
+					.select("*")
+					.eq("jam_id", data.jam.id)
+					.order("joined_at", { ascending: true });
+
+				if (error) throw error;
+				setParticipants(participantsData || []);
+			} catch (err) {
+				console.error("Error fetching participants:", err);
+			}
+		} catch (err) {
+			setError(err instanceof Error ? err.message : "Failed to join jam");
+		} finally {
+			setIsLoading(false);
+		}
+	}, [jamCode]);
+
 	// Join jam when component mounts and user is authenticated
 	useEffect(() => {
-		const joinJam = async () => {
-			try {
-				setError(null);
-				const response = await fetch(`/api/jams/${jamCode}/join`, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-				});
-
-				const data = await response.json();
-
-				if (!response.ok) {
-					throw new Error(data.error || "Failed to join jam");
-				}
-
-				setJam(data.jam);
-				setIsJoined(true);
-				// Fetch participants after joining
-				try {
-					const { data: participantsData, error } = await supabase
-						.from("jam_participants")
-						.select("*")
-						.eq("jam_id", data.jam.id)
-						.order("joined_at", { ascending: true });
-
-					if (error) throw error;
-					setParticipants(participantsData || []);
-				} catch (err) {
-					console.error("Error fetching participants:", err);
-				}
-			} catch (err) {
-				setError(err instanceof Error ? err.message : "Failed to join jam");
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
 		if (status === "authenticated" && session?.user && !isJoined) {
 			joinJam();
 		}
-	}, [status, session, jamCode, isJoined]);
+	}, [status, session, jamCode, isJoined, joinJam]);
 
 	// Set up real-time subscription for participants
 	useEffect(() => {

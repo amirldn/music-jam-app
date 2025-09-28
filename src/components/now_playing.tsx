@@ -182,7 +182,7 @@ export default function NowPlaying() {
 			// Clean up interval on component unmount
 			return () => clearInterval(interval);
 		}
-	}, [status, session?.user?.accessToken]);
+	}, [status, session?.user?.accessToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	if (status === "loading") {
 		return (
