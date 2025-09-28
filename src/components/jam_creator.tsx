@@ -33,7 +33,7 @@ export default function JamCreator({ onClose }: JamCreatorProps) {
 			}
 
 			// Redirect to the jam
-			router.push(`/visuals?jam=${data.jam.code}`);
+			router.push(`/?jam=${data.jam.code}`);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Failed to create jam");
 		} finally {

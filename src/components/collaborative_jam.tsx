@@ -213,7 +213,7 @@ export default function CollaborativeJam({ jamCode }: CollaborativeJamProps) {
 			await fetch(`/api/jams/${jamCode}/leave`, {
 				method: "POST",
 			});
-			router.push("/visuals");
+			router.push("/");
 		} catch (err) {
 			console.error("Error leaving jam:", err);
 		}
@@ -248,7 +248,7 @@ export default function CollaborativeJam({ jamCode }: CollaborativeJamProps) {
 				<div className="text-red-200 mb-4">{error}</div>
 				<div className="flex gap-3">
 					<button
-						onClick={() => router.push("/visuals")}
+						onClick={() => router.push("/")}
 						className="px-4 py-2 bg-zinc-600 hover:bg-zinc-700 text-white rounded-lg transition-colors"
 					>
 						Go Back
