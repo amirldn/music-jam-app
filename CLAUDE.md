@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Next.js 15 music jamming application that integrates with Spotify. The app allows users to authenticate with Spotify and displays their currently playing track in real-time.
+This is a Next.js 15 collaborative music jamming application that integrates with Spotify. The app allows users to authenticate with Spotify and displays their currently playing track in real-time. Users can create and join music jams to see what everyone in the group is listening to simultaneously.
 
 ## Development Commands
 
@@ -23,7 +23,11 @@ This is a Next.js 15 music jamming application that integrates with Spotify. The
 - Middleware protection via `/middleware.ts`
 
 ### Key Components
-- `/components/now_playing.tsx` - Real-time Spotify playback display with polling every 5 seconds
+- `/components/now_playing.tsx` - Real-time Spotify playback display with polling every 5 seconds (solo mode)
+- `/components/jam_session.tsx` - Main component that handles solo vs collaborative mode based on URL parameters
+- `/components/collaborative_jam.tsx` - Handles multi-user jam sessions with real-time updates
+- `/components/multi_user_display.tsx` - Displays all participants and their current tracks in a grid layout
+- `/components/jam_creator.tsx` - Modal for creating new music jams
 - `/components/sign_in.tsx` - Authentication sign-in component
 - `/components/sign_out.tsx` - Authentication sign-out component
 - `/components/user_avatar.tsx` - User profile display
@@ -36,6 +40,7 @@ This is a Next.js 15 music jamming application that integrates with Spotify. The
 
 ### Tech Stack
 - **Framework**: Next.js 15 with App Router
+- **Database**: Supabase (PostgreSQL) for jam sessions and real-time updates
 - **UI**: TailwindCSS v4 for styling
 - **Authentication**: Next.js Auth.js v5 beta
 - **Spotify API**: @spotify/web-api-ts-sdk
@@ -50,7 +55,16 @@ This is a Next.js 15 music jamming application that integrates with Spotify. The
 
 ### Environment Variables Required
 - `NEXT_PUBLIC_AUTH_SPOTIFY_ID` - Spotify Client ID (used in client components)
+- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous/public key
 - Additional Spotify credentials needed for NextAuth configuration
+
+### Collaborative Features
+- **Jam Creation**: Users can create music jams with shareable 6-character codes
+- **Real-time Sync**: Uses Supabase real-time subscriptions to sync participant data
+- **Track ID Approach**: Only Spotify track IDs are shared (not full track data) for efficiency and security
+- **Multi-user Display**: Responsive grid layout showing all participants and their current tracks
+- **URL-based Joining**: Users join jams via `/?jam=XXXXXX` URL parameter
 
 ### Development Notes
 - Uses TypeScript with strict mode enabled

@@ -1,16 +1,24 @@
 import SignOut from "@/components/sign_out";
-import UserAvatar from "@/components/user_avatar";
-import NowPlaying from "@/components/now_playing";
+import JamSession from "@/components/jam_session";
+import { Suspense } from "react";
 
-export default function Visuals() {
+function VisualsContent() {
 	return (
 		<div className="font-sans grid items-center justify-items-center min-h-screen pb-20 sm:p-20">
 			<main className="flex items-center sm:items-start">
-				<NowPlaying />
+				<JamSession />
 			</main>
 			<footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
 				<SignOut />
 			</footer>
 		</div>
+	);
+}
+
+export default function Visuals() {
+	return (
+		<Suspense fallback={<div>Loading...</div>}>
+			<VisualsContent />
+		</Suspense>
 	);
 }
