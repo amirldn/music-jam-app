@@ -16,9 +16,10 @@ interface NowPlayingViewProps {
 		images?: Array<{ url: string; height: number; width: number }>;
 	};
 	isPlaying?: boolean;
+	isTransitioning?: boolean;
 }
 
-function NowPlayingView({ track, isPlaying = false }: NowPlayingViewProps) {
+function NowPlayingView({ track, isPlaying = false, isTransitioning = false }: NowPlayingViewProps) {
 	const albumCover = track?.album?.images?.[0]?.url || track?.images?.[0]?.url;
 	const artistNames = track?.artists?.map(artist => artist.name).join(", ");
 
@@ -41,22 +42,28 @@ function NowPlayingView({ track, isPlaying = false }: NowPlayingViewProps) {
 					</div>
 				</div>
 				<div className="col-span-8 flex flex-col justify-center">
-					<h2 className="text-white text-3xl font-bold mb-2">
+					<h2 className={`text-white text-3xl font-bold mb-2 transition-opacity duration-300 ease-in-out ${
+						isTransitioning ? 'opacity-0' : 'opacity-100'
+					}`}>
 						{track?.name || "Not Playing"}
 					</h2>
-					<p className="text-zinc-400 text-xl">
+					<p className={`text-zinc-400 text-xl transition-opacity duration-300 ease-in-out ${
+						isTransitioning ? 'opacity-0' : 'opacity-100'
+					}`}>
 						{artistNames || "Connect Spotify to see what's playing"}
 					</p>
 					{track?.album?.name && (
-						<p className="text-zinc-500 text-lg mt-1">
+						<p className={`text-zinc-500 text-lg mt-1 transition-opacity duration-300 ease-in-out ${
+							isTransitioning ? 'opacity-0' : 'opacity-100'
+						}`}>
 							{track.album.name}
 						</p>
 					)}
 					{track && (
 						<div className="mt-2">
-							<span className={`inline-flex items-center px-2 py-1 rounded-full text-xs text-white ${
+							<span className={`inline-flex items-center px-2 py-1 rounded-full text-xs text-white transition-all duration-300 ease-in-out ${
 								isPlaying ? 'bg-green-600' : 'bg-gray-600'
-							}`}>
+							} ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
 								{isPlaying ? '● Playing' : '⏸ Paused'}
 							</span>
 						</div>
@@ -72,6 +79,30 @@ export default function NowPlaying() {
 	const [nowPlaying, setNowPlaying] = useState<PlaybackState | null>(null);
 	const [initialLoading, setInitialLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [isTransitioning, setIsTransitioning] = useState(false);
+
+	// Helper function to detect if track data has meaningfully changed
+	const hasTrackChanged = (newData: PlaybackState | null, oldData: PlaybackState | null) => {
+		// If both are null/undefined, no change
+		if (!newData && !oldData) return false;
+
+		// If one is null but the other isn't, that's a change
+		if (!newData || !oldData) return true;
+
+		// If both have no item (no track playing), no change
+		if (!newData.item && !oldData.item) return false;
+
+		// If one has an item but the other doesn't, that's a change
+		if (!newData.item || !oldData.item) return true;
+
+		const newTrackId = newData.item.id;
+		const oldTrackId = oldData.item.id;
+		const newIsPlaying = newData.is_playing;
+		const oldIsPlaying = oldData.is_playing;
+
+		// Only consider it a change if track ID or playing state actually changed
+		return newTrackId !== oldTrackId || newIsPlaying !== oldIsPlaying;
+	};
 
 	useEffect(() => {
 		if (status === "authenticated" && session?.user?.accessToken) {
@@ -91,7 +122,27 @@ export default function NowPlaying() {
 					);
 
 					const result = await sdk.player.getCurrentlyPlayingTrack();
-					setNowPlaying(result);
+
+					// Check if data has actually changed
+					if (hasTrackChanged(result, nowPlaying)) {
+						// Only transition if we already have data (not first load)
+						if (nowPlaying) {
+							// Start fade out
+							setIsTransitioning(true);
+
+							// Wait for fade out to complete, then update data and fade in
+							setTimeout(() => {
+								setNowPlaying(result);
+								setIsTransitioning(false);
+							}, 150); // Half of the transition duration
+						} else {
+							// First load, no transition needed
+							setNowPlaying(result);
+						}
+					} else {
+						// No meaningful change, just update silently
+						setNowPlaying(result);
+					}
 				} catch (error) {
 					console.error("Error fetching now playing:", error);
 					// Only show error if we don't have existing data
@@ -155,6 +206,7 @@ export default function NowPlaying() {
 		<NowPlayingView
 			track={nowPlaying?.item}
 			isPlaying={nowPlaying?.is_playing}
+			isTransitioning={isTransitioning}
 		/>
 	);
 }
