@@ -1,4 +1,5 @@
 import { auth } from "@/app/auth";
+import Image from "next/image";
 
 export default async function UserAvatar() {
 	const session = await auth();
@@ -7,10 +8,12 @@ export default async function UserAvatar() {
 
 	return (
 		<div>
-			<img
+			<Image
 				className="rounded-4xl size-1/2"
 				src={session.user.image}
-				alt={"User Avatar"}
+				alt={`${session.user.name || 'User'} Avatar`}
+				width={96}
+				height={96}
 			/>
 		</div>
 	);

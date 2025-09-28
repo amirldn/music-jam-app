@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { SpotifyApi, PlaybackState } from "@spotify/web-api-ts-sdk";
+import Image from "next/image";
 
 interface NowPlayingViewProps {
 	track?: {
@@ -27,10 +28,12 @@ function NowPlayingView({ track, isPlaying = false }: NowPlayingViewProps) {
 				<div className="col-span-4 flex items-center justify-center">
 					<div className="w-48 h-48 bg-zinc-800 rounded-lg flex items-center justify-center shadow-lg overflow-hidden">
 						{albumCover ? (
-							<img
+							<Image
 								src={albumCover}
 								alt={`${track?.album?.name} album cover`}
 								className="w-full h-full object-cover"
+								width={192}
+								height={192}
 							/>
 						) : (
 							<span className="text-zinc-500 text-lg">No track</span>
@@ -68,12 +71,14 @@ export default function NowPlaying() {
 	const { data: session, status } = useSession();
 	const [nowPlaying, setNowPlaying] = useState<PlaybackState | null>(null);
 	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (status === "authenticated" && session?.user?.accessToken) {
 			const fetchNowPlaying = async () => {
 				try {
 					setLoading(true);
+					setError(null);
 					const accessToken = session.user.accessToken;
 					if (!accessToken) return;
 
@@ -86,6 +91,7 @@ export default function NowPlaying() {
 					setNowPlaying(result);
 				} catch (error) {
 					console.error("Error fetching now playing:", error);
+					setError("Failed to fetch current track. Please try again.");
 				} finally {
 					setLoading(false);
 				}
@@ -102,8 +108,29 @@ export default function NowPlaying() {
 		}
 	}, [status, session?.user?.accessToken]);
 
-	if (status === "loading" || loading) {
-		return <div>Loading...</div>;
+	if (status === "loading") {
+		return (
+			<div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-6 bg-zinc-900/60 backdrop-blur-md rounded-xl">
+				<div className="text-white text-xl">Loading session...</div>
+			</div>
+		);
+	}
+
+	if (loading) {
+		return (
+			<div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-6 bg-zinc-900/60 backdrop-blur-md rounded-xl">
+				<div className="text-white text-xl">Fetching track info...</div>
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-6 bg-red-900/60 backdrop-blur-md rounded-xl">
+				<div className="text-white text-xl mb-2">Error</div>
+				<div className="text-red-200">{error}</div>
+			</div>
+		);
 	}
 
 	return (
