@@ -19,9 +19,13 @@ interface NowPlayingViewProps {
 	isTransitioning?: boolean;
 }
 
-function NowPlayingView({ track, isPlaying = false, isTransitioning = false }: NowPlayingViewProps) {
+function NowPlayingView({
+	track,
+	isPlaying = false,
+	isTransitioning = false,
+}: NowPlayingViewProps) {
 	const albumCover = track?.album?.images?.[0]?.url || track?.images?.[0]?.url;
-	const artistNames = track?.artists?.map(artist => artist.name).join(", ");
+	const artistNames = track?.artists?.map((artist) => artist.name).join(", ");
 
 	return (
 		<div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-6 bg-zinc-900/60 backdrop-blur-md rounded-xl shadow-[0_0_30px_rgba(22,163,74,0.3)] animate-float">
@@ -42,29 +46,37 @@ function NowPlayingView({ track, isPlaying = false, isTransitioning = false }: N
 					</div>
 				</div>
 				<div className="col-span-8 flex flex-col justify-center">
-					<h2 className={`text-white text-3xl font-bold mb-2 transition-opacity duration-300 ease-in-out ${
-						isTransitioning ? 'opacity-0' : 'opacity-100'
-					}`}>
+					<h2
+						className={`text-white text-3xl font-bold mb-2 transition-opacity duration-300 ease-in-out ${
+							isTransitioning ? "opacity-0" : "opacity-100"
+						}`}
+					>
 						{track?.name || "Not Playing"}
 					</h2>
-					<p className={`text-zinc-400 text-xl transition-opacity duration-300 ease-in-out ${
-						isTransitioning ? 'opacity-0' : 'opacity-100'
-					}`}>
+					<p
+						className={`text-zinc-400 text-xl transition-opacity duration-300 ease-in-out ${
+							isTransitioning ? "opacity-0" : "opacity-100"
+						}`}
+					>
 						{artistNames || "Connect Spotify to see what's playing"}
 					</p>
 					{track?.album?.name && (
-						<p className={`text-zinc-500 text-lg mt-1 transition-opacity duration-300 ease-in-out ${
-							isTransitioning ? 'opacity-0' : 'opacity-100'
-						}`}>
+						<p
+							className={`text-zinc-500 text-lg mt-1 transition-opacity duration-300 ease-in-out ${
+								isTransitioning ? "opacity-0" : "opacity-100"
+							}`}
+						>
 							{track.album.name}
 						</p>
 					)}
 					{track && (
 						<div className="mt-2">
-							<span className={`inline-flex items-center px-2 py-1 rounded-full text-xs text-white transition-all duration-300 ease-in-out ${
-								isPlaying ? 'bg-green-600' : 'bg-gray-600'
-							} ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
-								{isPlaying ? '● Playing' : '⏸ Paused'}
+							<span
+								className={`inline-flex items-center px-2 py-1 rounded-full text-xs text-white transition-all duration-300 ease-in-out ${
+									isPlaying ? "bg-green-600" : "bg-gray-600"
+								} ${isTransitioning ? "opacity-0" : "opacity-100"}`}
+							>
+								{isPlaying ? "● Playing" : "⏸ Paused"}
 							</span>
 						</div>
 					)}
@@ -82,7 +94,10 @@ export default function NowPlaying() {
 	const [isTransitioning, setIsTransitioning] = useState(false);
 
 	// Helper function to detect if track data has meaningfully changed
-	const hasTrackChanged = (newData: PlaybackState | null, oldData: PlaybackState | null) => {
+	const hasTrackChanged = (
+		newData: PlaybackState | null,
+		oldData: PlaybackState | null
+	) => {
 		// If both are null/undefined, no change
 		if (!newData && !oldData) return false;
 
@@ -105,7 +120,11 @@ export default function NowPlaying() {
 	};
 
 	useEffect(() => {
-		if (status === "authenticated" && session?.user?.accessToken) {
+		if (
+			status === "authenticated" &&
+			session?.user &&
+			session.user.accessToken
+		) {
 			const fetchNowPlaying = async () => {
 				try {
 					// Only show loading state if this is the first fetch
@@ -163,7 +182,7 @@ export default function NowPlaying() {
 			// Clean up interval on component unmount
 			return () => clearInterval(interval);
 		}
-	}, [status, session?.user?.accessToken]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [status, session?.user?.accessToken]);
 
 	if (status === "loading") {
 		return (
