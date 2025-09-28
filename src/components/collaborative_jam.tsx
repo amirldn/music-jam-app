@@ -281,7 +281,7 @@ export default function CollaborativeJam({ jamCode }: CollaborativeJamProps) {
 			{/* Jam Header */}
 			<div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-40 bg-zinc-900/80 backdrop-blur-md rounded-lg px-6 py-3">
 				<div className="text-white text-center">
-					<div className="text-lg font-bold">{jam.name}</div>
+					<div className="text-lg font-bold">Music Jam</div>
 					<div className="text-sm text-zinc-300">Code: {jam.code}</div>
 				</div>
 			</div>

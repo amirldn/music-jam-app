@@ -12,7 +12,6 @@ export type Database = {
         Row: {
           id: string
           code: string
-          name: string | null
           host_user_id: string
           created_at: string
           is_active: boolean
@@ -20,7 +19,6 @@ export type Database = {
         Insert: {
           id?: string
           code: string
-          name?: string | null
           host_user_id: string
           created_at?: string
           is_active?: boolean
@@ -28,7 +26,6 @@ export type Database = {
         Update: {
           id?: string
           code?: string
-          name?: string | null
           host_user_id?: string
           created_at?: string
           is_active?: boolean

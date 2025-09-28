@@ -1,17 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { auth } from '../../../auth'
 import { supabase } from '@/lib/supabase'
 import { generateJamCode } from '@/lib/jamUtils'
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     const session = await auth()
 
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    const { name } = await request.json()
 
     // Generate a unique jam code
     let code = generateJamCode()
@@ -35,12 +33,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to generate unique code' }, { status: 500 })
     }
 
-    // Create the jam
+    // Create the jam (no name needed)
     const { data: jam, error } = await supabase
       .from('jams')
       .insert({
         code,
-        name: name || 'Untitled Jam',
         host_user_id: session.user.id || session.user.email || 'unknown'
       })
       .select()
